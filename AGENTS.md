@@ -31,15 +31,23 @@ These roles exist in the spec ledger; v0 does not implement them.
 - Plain assertions. The rubric is the discipline; the prose is
   scaffolding.
 
-## Gates (will land in spec 0002)
+## Gates (shipped in v0.1; spec 0002)
 
-- `voice_lint` on every memo and every rubric revision
-- `enforce_counts.py` — exactly 2 ATTEND, exactly 3 RETIRE per memo;
-  every other active repo in FREEZE; fails otherwise
-- `validate_schemas.py` — `memo.schema.json` validates every
-  `repo_triage/*.md` front-matter block
-- `rubric_pinned.py` — every memo's front-matter pins the rubric
-  version it scored against
+All four gates are subcommands of the `repo-triage` CLI. The
+`scripts/*.py` files are thin shims that re-export them.
+
+- `repo-triage voice-lint <memo>` — rejects banned marketing /
+  antithetical-reversal phrases (see `src/repo_triage/cli.py`).
+- `repo-triage enforce-counts <memo> --portfolio config/portfolio.yaml`
+  — exactly 2 ATTEND, exactly 3 RETIRE per memo; every other active
+  repo in FREEZE; fails otherwise.
+- `repo-triage validate-schemas <memo> --memo-schema schemas/memo.schema.json
+  --scoring-schema schemas/scoring.schema.json --scoring-dir scoring/<month>/`
+  — JSON-schema validation of memo front-matter and every scoring stub.
+- `repo-triage rubric-pinned <memo> --rubric rules/v0.md` — memo's
+  front-matter pins a rubric version matching the file on disk.
+
+CI runs all four on every push and PR; see `.github/workflows/ci.yml`.
 
 ## Out of scope
 

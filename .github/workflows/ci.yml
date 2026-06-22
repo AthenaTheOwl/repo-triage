@@ -1,0 +1,50 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: install uv
+        run: pip install uv
+
+      - name: sync
+        run: python -m uv sync
+
+      - name: pytest
+        run: python -m uv run pytest -v
+
+      - name: enforce-counts
+        run: |
+          python -m uv run repo-triage enforce-counts \
+            repo_triage/2026-M07.md \
+            --portfolio config/portfolio.yaml
+
+      - name: validate-schemas
+        run: |
+          python -m uv run repo-triage validate-schemas \
+            repo_triage/2026-M07.md \
+            --memo-schema schemas/memo.schema.json \
+            --scoring-schema schemas/scoring.schema.json \
+            --scoring-dir scoring/2026-M07/
+
+      - name: rubric-pinned
+        run: |
+          python -m uv run repo-triage rubric-pinned \
+            repo_triage/2026-M07.md \
+            --rubric rules/v0.md
+
+      - name: voice-lint
+        run: |
+          python -m uv run repo-triage voice-lint \
+            repo_triage/2026-M07.md

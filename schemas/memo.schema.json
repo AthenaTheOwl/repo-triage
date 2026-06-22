@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://athena-the-owl.example/schemas/memo.schema.json",
+  "title": "Repo Triage monthly memo",
+  "description": "Front-matter shape of a monthly memo.",
+  "type": "object",
+  "required": ["month", "rubric_version", "attend", "retire", "freeze"],
+  "additionalProperties": false,
+  "properties": {
+    "month": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+    },
+    "rubric_version": {
+      "type": "string",
+      "pattern": "^v[0-9]+$"
+    },
+    "attend": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true
+    },
+    "retire": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true
+    },
+    "freeze": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+      "uniqueItems": true
+    },
+    "deltas": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

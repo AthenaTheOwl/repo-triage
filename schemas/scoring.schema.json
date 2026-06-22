@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://athena-the-owl.example/schemas/scoring.schema.json",
+  "title": "Repo Triage scoring stub",
+  "description": "Front-matter shape of a per-repo monthly scoring stub.",
+  "type": "object",
+  "required": ["repo", "month", "rubric_version", "scores", "evidence"],
+  "additionalProperties": false,
+  "properties": {
+    "repo": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Filesystem-safe slug matching an entry in config/portfolio.yaml."
+    },
+    "month": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+      "description": "ISO year-month, e.g. 2026-07."
+    },
+    "rubric_version": {
+      "type": "string",
+      "pattern": "^v[0-9]+$",
+      "description": "Pinned rubric version, e.g. v0."
+    },
+    "scores": {
+      "type": "object",
+      "required": [
+        "thesis_still_credible",
+        "pull_from_outside",
+        "shippable_next_step",
+        "cost_of_freeze",
+        "dependency_in_portfolio"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "thesis_still_credible": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "pull_from_outside": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "shippable_next_step": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "cost_of_freeze": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "dependency_in_portfolio": { "type": "integer", "minimum": 0, "maximum": 3 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "thesis_still_credible",
+        "pull_from_outside",
+        "shippable_next_step",
+        "cost_of_freeze",
+        "dependency_in_portfolio"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "thesis_still_credible": { "type": "string" },
+        "pull_from_outside": { "type": "string" },
+        "shippable_next_step": { "type": "string" },
+        "cost_of_freeze": { "type": "string" },
+        "dependency_in_portfolio": { "type": "string" }
+      }
+    },
+    "author": { "type": "string" }
+  }
+}
