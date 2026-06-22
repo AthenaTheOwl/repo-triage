@@ -1,0 +1,46 @@
+version: v0
+# The canonical list of active portfolio repos this memo scores against.
+# Adding or removing a repo is a PR to this file plus a one-line rationale
+# in the PR description. Each entry has a slug (filesystem-safe) and a
+# one-line thesis used as scaffolding in the scoring stub.
+repos:
+  - slug: grid-silicon
+    thesis: Hardware/software co-design experiment for the inference grid.
+  - slug: dream-replay-cli
+    thesis: Replay captured sleep-state experiments deterministically from CLI.
+  - slug: cdcp-control-plane
+    thesis: Control plane for the portfolio; consumes typed memos and routes attention.
+  - slug: memory-graph-ng
+    thesis: Knowledge graph runtime with provenance edges for agent memory.
+  - slug: owl-eval-bench
+    thesis: Eval benchmarks for AthenaTheOwl agent quality regressions.
+  - slug: context-archeologist
+    thesis: Mines historical agent transcripts for recurrent failure patterns.
+  - slug: prompt-quilt
+    thesis: Composable prompt fragments with provenance and cache keys.
+  - slug: signal-broker
+    thesis: Pubsub experiment for cross-agent signal routing.
+  - slug: notebook-forge
+    thesis: A small DSL for authoring reproducible notebooks.
+  - slug: retro-claim
+    thesis: Verifier for retrospective claims about prior agent runs.
+  - slug: quiet-audit
+    thesis: Detects log noise spikes in long-running agent processes.
+  - slug: compose-canvas
+    thesis: UI composition library for inspecting agent state.
+  - slug: shadow-reviewer
+    thesis: Background code-review assistant that lurks on PR drafts.
+  - slug: token-cartography
+    thesis: Token usage analytics across long-running agent sessions.
+  - slug: spec-ledger-template
+    thesis: Meta-template for the spec-ledger convention used in this portfolio.
+  - slug: drift-canary
+    thesis: Observability drift checker that runs on every memo merge.
+  - slug: memo-archive
+    thesis: Historical archive of monthly memos with query interface.
+  - slug: foo-bar-old
+    thesis: Legacy CLI tool; thesis falsified mid-2025, no inbound since.
+  - slug: baz-experiment
+    thesis: Abandoned 2025 experiment in cross-repo dependency graphs.
+  - slug: quux-prototype
+    thesis: 2025 prototype for in-place repo scoring; superseded by this repo.

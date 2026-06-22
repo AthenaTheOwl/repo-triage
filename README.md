@@ -29,31 +29,49 @@ counts (2, 3, all-else) are non-negotiable.
 
 ## Status
 
-v0 scaffold. No memo published yet — only the spec ledger and the
-rubric design below. First memo lands in spec 0002.
+v0.1. Rubric, CLI, gates, and the first calibration ledger row
+(`repo_triage/2026-M07.md`) are all checked in. Live state lives in
+`STATUS.md`.
 
 - [x] Repo scaffold + LICENSE + AGENTS.md
 - [x] Spec 0001 (foundation) — requirements, design, tasks, acceptance
 - [x] First-PR plan in `docs/first-pr.md`
-- [ ] Rubric `rules/v0.md` checked in
-- [ ] First hand-scored pass of all 20 repos
-- [ ] First monthly memo `repo_triage/2026-M07.md`
+- [x] Rubric `rules/v0.md` checked in
+- [x] First hand-scored pass of all 20 repos (`scoring/2026-M07/`)
+- [x] First monthly memo `repo_triage/2026-M07.md`
+- [x] Four gates: `enforce_counts`, `validate_schemas`, `rubric_pinned`, `voice_lint`
+- [x] CI workflow running all gates on every PR
 
 ## How to run
 
-Placeholder. Writing the first memo is a manual editorial pass against
-the rubric in `rules/v0.md`. A small script `scripts/score_template.py`
-will emit a per-repo scoring stub from the rubric. The runnable shape
-lands in spec 0002.
-
 ```bash
-# After spec 0002 lands:
-python scripts/score_template.py --rubric rules/v0.md --out scratch/2026-M07-scoring/
-# fill in the stubs by hand, then:
-python scripts/render_memo.py --scoring scratch/2026-M07-scoring/ --out repo_triage/2026-M07.md
+python -m uv sync
+
+# day 1 of the month — emit one hand-fill stub per portfolio repo
+python -m uv run repo-triage score-template \
+    --portfolio config/portfolio.yaml \
+    --rubric rules/v0.md \
+    --month 2026-07 \
+    --out scoring/2026-M07/
+
+# days 2-4 — the operator fills in each stub by hand
+
+# day 5 — render the memo and run the four gates
+python -m uv run repo-triage render-memo \
+    --scoring scoring/2026-M07/ \
+    --portfolio config/portfolio.yaml \
+    --rubric rules/v0.md \
+    --month 2026-07 \
+    --out repo_triage/2026-M07.md
+
+python -m uv run repo-triage enforce-counts repo_triage/2026-M07.md --portfolio config/portfolio.yaml
+python -m uv run repo-triage validate-schemas repo_triage/2026-M07.md --memo-schema schemas/memo.schema.json --scoring-schema schemas/scoring.schema.json --scoring-dir scoring/2026-M07/
+python -m uv run repo-triage rubric-pinned repo_triage/2026-M07.md --rubric rules/v0.md
+python -m uv run repo-triage voice-lint repo_triage/2026-M07.md
 ```
 
-Until spec 0002 lands, this is a scaffold.
+See `docs/methodology.md` for why the discipline looks this way, and
+`docs/system-map.md` for the file-level orientation.
 
 ## Layout
 
@@ -73,23 +91,42 @@ repo-triage/
     first-pr.md
 ```
 
-Planned but not yet present:
+Shipped in v0.1:
 
 ```
+  STATUS.md
+  pyproject.toml
+  src/repo_triage/                   # the Python package
+    __init__.py
+    portfolio.py
+    rubric.py
+    scoring.py
+    memo.py
+    cli.py
+    __main__.py
   rules/
     v0.md                            # the 5-factor rubric
-  repo_triage/
-    2026-M07.md                      # first monthly memo
-    2026-M08.md
-  scoring/
-    2026-M07/                        # per-repo hand-scored stubs
-  scripts/
-    score_template.py
-    render_memo.py
-    enforce_counts.py
+  config/
+    portfolio.yaml                   # 20 active portfolio repos
   schemas/
     scoring.schema.json
     memo.schema.json
+  scoring/
+    2026-M07/<repo>.md               # one hand-filled stub per repo
+  repo_triage/
+    2026-M07.md                      # first monthly memo
+  scripts/                           # thin shims over the CLI
+    score_template.py
+    render_memo.py
+    enforce_counts.py
+    validate_schemas.py
+    rubric_pinned.py
+    voice_lint.py
+  tests/
+  docs/
+    methodology.md
+    system-map.md
+  .github/workflows/ci.yml
 ```
 
 ## Who this is for

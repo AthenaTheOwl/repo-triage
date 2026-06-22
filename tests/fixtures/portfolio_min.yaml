@@ -1,0 +1,12 @@
+version: v0
+repos:
+  - slug: alpha
+    thesis: First fixture repo.
+  - slug: bravo
+    thesis: Second fixture repo.
+  - slug: charlie
+    thesis: Third fixture repo.
+  - slug: delta
+    thesis: Fourth fixture repo.
+  - slug: echo
+    thesis: Fifth fixture repo.
