@@ -136,43 +136,88 @@ def validate_schemas_cmd(
     scoring_dir: str | None,
 ) -> None:
     """Validate memo front-matter (and optionally scoring stubs) against JSON schemas."""
+    errors = _validate_schemas(
+        memo_path=Path(memo_path),
+        memo_schema=Path(memo_schema),
+        scoring_schema=Path(scoring_schema) if scoring_schema else None,
+        scoring_dir=Path(scoring_dir) if scoring_dir else None,
+    )
+    if errors:
+        for e in errors:
+            click.echo(e, err=True)
+        sys.exit(1)
+    click.echo("validate_schemas: ok")
+
+
+def _validate_schemas(
+    *,
+    memo_path: Path,
+    memo_schema: Path,
+    scoring_schema: Path | None,
+    scoring_dir: Path | None,
+) -> list[str]:
+    """Return a list of schema violations. Empty list = pass."""
     import yaml
     from jsonschema import Draft202012Validator
 
-    text = Path(memo_path).read_text(encoding="utf-8")
+    errors: list[str] = []
+
+    text = memo_path.read_text(encoding="utf-8")
     if not text.startswith("---\n"):
-        click.echo("validate_schemas: memo missing front-matter", err=True)
-        sys.exit(1)
+        return ["validate_schemas: memo missing front-matter"]
     end = text.find("\n---", 4)
     front = yaml.safe_load(text[4:end])
 
-    schema = json.loads(Path(memo_schema).read_text(encoding="utf-8"))
-    errors = list(Draft202012Validator(schema).iter_errors(front))
-    if errors:
-        for e in errors:
-            click.echo(f"validate_schemas[memo]: {e.message}", err=True)
-        sys.exit(1)
+    schema = json.loads(memo_schema.read_text(encoding="utf-8"))
+    for e in Draft202012Validator(schema).iter_errors(front):
+        errors.append(f"validate_schemas[memo]: {e.message}")
 
     if scoring_dir and scoring_schema:
-        sc_schema = json.loads(Path(scoring_schema).read_text(encoding="utf-8"))
+        sc_schema = json.loads(scoring_schema.read_text(encoding="utf-8"))
         validator = Draft202012Validator(sc_schema)
-        any_failed = False
-        for stub_path in sorted(Path(scoring_dir).glob("*.md")):
+        for stub_path in sorted(scoring_dir.glob("*.md")):
             stub_text = stub_path.read_text(encoding="utf-8")
             if not stub_text.startswith("---\n"):
-                click.echo(f"validate_schemas[stub:{stub_path.name}]: missing front-matter", err=True)
-                any_failed = True
+                errors.append(f"validate_schemas[stub:{stub_path.name}]: missing front-matter")
                 continue
             stub_end = stub_text.find("\n---", 4)
             stub_front = yaml.safe_load(stub_text[4:stub_end])
-            stub_errors = list(validator.iter_errors(stub_front))
-            for e in stub_errors:
-                click.echo(f"validate_schemas[stub:{stub_path.name}]: {e.message}", err=True)
-                any_failed = True
-        if any_failed:
-            sys.exit(1)
+            for e in validator.iter_errors(stub_front):
+                errors.append(f"validate_schemas[stub:{stub_path.name}]: {e.message}")
 
-    click.echo("validate_schemas: ok")
+    return errors
+
+
+# repo root is two parents up from this file: src/repo_triage/cli.py
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+@main.command("validate")
+def validate_cmd() -> None:
+    """Validate the bundled committed memo and scoring stubs against the schemas.
+
+    This is the canonical no-arg sanity check: it reads only committed
+    artifacts (the latest monthly memo, its scoring stubs, and the bundled
+    schemas) and exits 0 when they are schema-valid. No network, no writes.
+    """
+    memos = sorted(_REPO_ROOT.glob("repo_triage/[0-9][0-9][0-9][0-9]-M[0-9][0-9].md"))
+    if not memos:
+        click.echo("validate: no committed memo found under repo_triage/", err=True)
+        sys.exit(1)
+    memo_path = memos[-1]
+    month = memo_path.stem  # e.g. 2026-M07
+
+    errors = _validate_schemas(
+        memo_path=memo_path,
+        memo_schema=_REPO_ROOT / "schemas" / "memo.schema.json",
+        scoring_schema=_REPO_ROOT / "schemas" / "scoring.schema.json",
+        scoring_dir=_REPO_ROOT / "scoring" / month,
+    )
+    if errors:
+        for e in errors:
+            click.echo(e, err=True)
+        sys.exit(1)
+    click.echo(f"validate: ok ({memo_path.name} and its scoring stubs are schema-valid)")
 
 
 @main.command("rubric-pinned")
