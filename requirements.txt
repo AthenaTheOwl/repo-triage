@@ -1,0 +1,5 @@
+# Streamlit Community Cloud reads this file. The app (streamlit_app.py) reads the
+# committed memo + scoring stubs directly, but reuses the repo_triage package to
+# parse them — so it installs the local package (.) for its parsing deps (pyyaml).
+streamlit>=1.40
+.

@@ -102,6 +102,25 @@ The ranked list is the point: it shows where next month's shipping
 attention goes and which repos the rubric forces you to archive, rather
 than letting the loudest repo win.
 
+## live demo
+
+`streamlit_app.py` (repo root) is the `show` verb as an interactive page:
+the same ranked attention table, plus 2-3 summary metrics, a bucket
+filter, and per-repo rubric evidence. it reads the committed memo and
+scoring stubs directly — no network, no secrets.
+
+run it locally:
+
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
+deploy on streamlit community cloud: new app -> repo
+`AthenaTheOwl/repo-triage`, branch `main`, main file `streamlit_app.py`.
+
+<!-- live url: https://<your-app>.streamlit.app (fill in after first deploy) -->
+
 ## Layout
 
 ```
