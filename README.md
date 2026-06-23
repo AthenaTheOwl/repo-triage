@@ -73,6 +73,35 @@ python -m uv run repo-triage voice-lint repo_triage/2026-M07.md
 See `docs/methodology.md` for why the discipline looks this way, and
 `docs/system-map.md` for the file-level orientation.
 
+## try it
+
+No arguments. Reads the committed memo (`repo_triage/2026-M07.md`) and
+its scoring stubs, then prints every portfolio repo ranked by composite
+score with its forced bucket:
+
+```bash
+python -m uv run repo-triage show
+```
+
+```
+repo triage - 2026-07  (rubric v0)
+ranked by composite thesis-alive score (0-15); attention is forced:
+  2 ATTEND  /  3 RETIRE  /  rest FREEZE
+
+  rank  score  bucket   repo
+     1  15/15  ATTEND   grid-silicon
+     2  14/15  ATTEND   dream-replay-cli
+     3  12/15  FREEZE   cdcp-control-plane
+    ...
+    20   0/15  RETIRE   quux-prototype
+
+this month's shipping attention: grid-silicon, dream-replay-cli
+```
+
+The ranked list is the point: it shows where next month's shipping
+attention goes and which repos the rubric forces you to archive, rather
+than letting the loudest repo win.
+
 ## Layout
 
 ```

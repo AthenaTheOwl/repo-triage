@@ -220,6 +220,62 @@ def validate_cmd() -> None:
     click.echo(f"validate: ok ({memo_path.name} and its scoring stubs are schema-valid)")
 
 
+@main.command("show")
+def show_cmd() -> None:
+    """Print the latest committed memo as a ranked attention table.
+
+    Reads only committed artifacts (the latest monthly memo and its
+    scoring stubs) and prints every portfolio repo ranked by composite
+    rubric score, with its ATTEND / RETIRE / FREEZE bucket and the
+    binding reason. No network, no writes. This is the no-arg view of
+    "where does next month's attention go, and why".
+    """
+    from repo_triage.scoring import parse_stub
+
+    memos = sorted(_REPO_ROOT.glob("repo_triage/[0-9][0-9][0-9][0-9]-M[0-9][0-9].md"))
+    if not memos:
+        click.echo("show: no committed memo found under repo_triage/", err=True)
+        sys.exit(1)
+    memo_path = memos[-1]
+    month = memo_path.stem  # e.g. 2026-M07
+    memo = load_memo(memo_path)
+
+    bucket_of: dict[str, str] = {}
+    for slug in memo.attend:
+        bucket_of[slug] = "ATTEND"
+    for slug in memo.retire:
+        bucket_of[slug] = "RETIRE"
+    for slug in memo.freeze:
+        bucket_of[slug] = "FREEZE"
+
+    scoring_dir = _REPO_ROOT / "scoring" / month
+    rows: list[tuple[int, str, str]] = []
+    for stub_path in sorted(scoring_dir.glob("*.md")):
+        stub = parse_stub(stub_path)
+        rows.append((stub.composite, stub.repo, bucket_of.get(stub.repo, "?")))
+
+    # Rank: highest composite first, ties by slug. Bucket as secondary key
+    # so the forced top-2 / bottom-3 ordering reads correctly even on ties.
+    order = {"ATTEND": 0, "FREEZE": 1, "RETIRE": 2, "?": 3}
+    rows.sort(key=lambda r: (order[r[2]], -r[0], r[1]))
+
+    click.echo(f"repo triage - {memo.month}  (rubric {memo.rubric_version})")
+    click.echo("ranked by composite thesis-alive score (0-15); attention is forced:")
+    click.echo("  2 ATTEND  /  3 RETIRE  /  rest FREEZE")
+    click.echo("")
+    click.echo(f"  {'rank':>4}  {'score':>5}  {'bucket':<7}  repo")
+    click.echo(f"  {'-' * 4}  {'-' * 5}  {'-' * 7}  {'-' * 24}")
+    for i, (composite, slug, bucket) in enumerate(rows, start=1):
+        click.echo(f"  {i:>4}  {composite:>2}/15  {bucket:<7}  {slug}")
+    click.echo("")
+    click.echo(f"this month's shipping attention: {', '.join(memo.attend)}")
+    click.echo(f"archived (needs a written revival rationale): {', '.join(memo.retire)}")
+    click.echo(
+        f"held without attention: {len(memo.freeze)} repos "
+        f"(see {memo_path.relative_to(_REPO_ROOT).as_posix()})"
+    )
+
+
 @main.command("rubric-pinned")
 @click.argument("memo_path", type=click.Path(exists=True))
 @click.option("--rubric", "rubric_path", required=True, type=click.Path(exists=True))

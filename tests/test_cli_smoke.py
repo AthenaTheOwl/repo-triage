@@ -18,8 +18,29 @@ def test_cli_help_lists_subcommands() -> None:
         "validate-schemas",
         "rubric-pinned",
         "voice-lint",
+        "show",
     ):
         assert sub in result.output
+
+
+def test_show_subcommand_no_args() -> None:
+    """`show` reads the committed memo and prints a ranked table, no args."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["show"])
+    assert result.exit_code == 0, result.output
+    out = result.output
+    # header + forcing-function note
+    assert "repo triage - 2026-07" in out
+    assert "ATTEND" in out and "RETIRE" in out and "FREEZE" in out
+    # the top-ranked repo and its forced bucket
+    assert "grid-silicon" in out
+    assert "15/15" in out
+    # the bottom-ranked retire repo
+    assert "quux-prototype" in out
+    # ranked order: grid-silicon (rank 1) appears before a freeze repo
+    assert out.index("grid-silicon") < out.index("cdcp-control-plane")
+    # attention summary line
+    assert "this month's shipping attention: grid-silicon, dream-replay-cli" in out
 
 
 def test_score_template_subcommand(
