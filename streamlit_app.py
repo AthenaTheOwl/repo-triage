@@ -24,9 +24,18 @@ SRC = REPO / "src"
 if SRC.exists() and str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from repo_triage.memo import _bucket  # noqa: E402
 from repo_triage.memo import load_memo  # noqa: E402
 from repo_triage.rubric import FACTOR_KEYS  # noqa: E402
-from repo_triage.scoring import parse_stub  # noqa: E402
+from repo_triage.scoring import ScoringStub, parse_stub  # noqa: E402
+
+FACTOR_TITLES = {
+    "thesis_still_credible": "thesis still credible",
+    "pull_from_outside": "pull from outside",
+    "shippable_next_step": "shippable next step",
+    "cost_of_freeze": "cost of freeze",
+    "dependency_in_portfolio": "dependency in the portfolio",
+}
 
 ORDER = {"ATTEND": 0, "FREEZE": 1, "RETIRE": 2, "?": 3}
 
@@ -138,4 +147,102 @@ st.caption(
     "v0.1 ships one calibration month. the rubric + CLI live in `src/repo_triage/`; "
     "this page reads the committed memo and scoring stubs directly. "
     "repo: github.com/AthenaTheOwl/repo-triage"
+)
+
+# --- interactive: re-score and re-rank with the real engine --------------------
+st.markdown("---")
+st.markdown("## re-score a repo yourself — drive the real ranking engine")
+st.caption(
+    "the table above reads the committed memo. below you edit the 0-3 factor "
+    "scores for any repo and the page re-runs the actual engine: "
+    "`ScoringStub.composite` for the per-repo totals and `repo_triage.memo._bucket` "
+    "for the forced 2 ATTEND / 3 RETIRE / rest FREEZE split. nothing here is "
+    "hardcoded — change a slider and watch the buckets re-rank live."
+)
+
+edit_repo = st.selectbox(
+    "repo to re-score",
+    options=[r["repo"] for r in rows],
+    help="pre-filled with this repo's committed scores; edit them below",
+)
+
+base_stub = stubs[edit_repo]
+st.markdown(f"**editing `{edit_repo}`** — committed composite {base_stub.composite}/15")
+
+new_scores: dict[str, int] = {}
+cols = st.columns(len(FACTOR_KEYS))
+for col, k in zip(cols, FACTOR_KEYS):
+    new_scores[k] = col.slider(
+        FACTOR_TITLES.get(k, k),
+        min_value=0,
+        max_value=3,
+        value=int(base_stub.scores.get(k, 0)),
+        key=f"slider_{k}",
+        help="0-3 per the v0 rubric",
+    )
+
+# Build a fresh stub for the edited repo and run the REAL composite property.
+edited_stub = ScoringStub(
+    repo=base_stub.repo,
+    month=base_stub.month,
+    rubric_version=base_stub.rubric_version,
+    scores=new_scores,
+    evidence=base_stub.evidence,
+    author=base_stub.author,
+)
+
+delta = edited_stub.composite - base_stub.composite
+st.metric(
+    f"{edit_repo} composite /15",
+    edited_stub.composite,
+    delta=delta if delta else None,
+    help="recomputed live by ScoringStub.composite (sum of the five factors)",
+)
+
+# Swap the edited stub into the full set and re-run the REAL bucketing engine.
+live_stubs = [edited_stub if s.repo == edit_repo else s for s in stubs.values()]
+attend, retire, freeze = _bucket(live_stubs)
+live_bucket: dict[str, str] = {}
+for slug in attend:
+    live_bucket[slug] = "ATTEND"
+for slug in retire:
+    live_bucket[slug] = "RETIRE"
+for slug in freeze:
+    live_bucket[slug] = "FREEZE"
+
+composite_of = {s.repo: s.composite for s in live_stubs}
+live_rows = sorted(
+    ({"repo": s.repo, "composite": s.composite, "bucket": live_bucket.get(s.repo, "?")} for s in live_stubs),
+    key=lambda r: (ORDER[r["bucket"]], -r["composite"], r["repo"]),
+)
+
+new_bucket = live_bucket.get(edit_repo, "?")
+old_bucket = bucket_of.get(edit_repo, "?")
+if new_bucket != old_bucket:
+    st.warning(
+        f"with your scores, **{edit_repo}** moves from **{old_bucket}** to "
+        f"**{new_bucket}**."
+    )
+else:
+    st.info(f"with your scores, **{edit_repo}** stays in **{new_bucket}**.")
+
+st.markdown("**live ranking (your edit applied, real engine):**")
+st.dataframe(
+    [
+        {
+            "rank": i,
+            "score /15": r["composite"],
+            "bucket": r["bucket"],
+            "repo": r["repo"] + ("  ← edited" if r["repo"] == edit_repo else ""),
+        }
+        for i, r in enumerate(live_rows, start=1)
+    ],
+    use_container_width=True,
+    hide_index=True,
+)
+st.caption(
+    f"ATTEND: {', '.join(attend)}  ·  RETIRE: {', '.join(retire)}  ·  "
+    f"FREEZE: {len(freeze)} held. "
+    "this split is produced by the same `_bucket` function the CLI uses to write "
+    "the monthly memo."
 )
