@@ -1,46 +1,68 @@
-# Monthly Repo Triage
+# repo-triage
 
-A single-file monthly memo across the ~20 active repos in the
-portfolio. Each month forces a top-2 ATTEND list, a bottom-3 RETIRE
-list, and a FREEZE list. No per-repo dashboard cards. No weekly
-noise. The memo is the artifact; the discipline is the forcing
-function.
+Twenty active repos. Every month the rubric forces exactly two onto the ATTEND
+list, three into RETIRE, and leaves the other fifteen frozen. The counts are
+non-negotiable, which is the whole point — you can't attend to everything, so the
+memo makes you say out loud what you're dropping.
 
-## What this is
+## What it does
 
-Portfolio attention drifts to whichever repo emitted the most recent
-emotionally salient signal (a green CI, a kind reply, a new idea at
-breakfast). The result is a portfolio where the loudest repo wins
-attention, not the one that most needs it.
+Attention drifts to whichever repo emitted the most recent salient signal: a green
+CI, a kind reply, an idea at breakfast. The loudest repo wins the month, not the one
+that most needs the month. repo-triage replaces the feeling with a written rule.
 
-This repo replaces that with a written rule:
+Each active repo is hand-scored 0-15 against a five-factor thesis-alive rubric. The
+top two by composite score get ATTEND — next month's shipping time goes there. The
+bottom three get RETIRE: archived, revived only on a new written rationale. Everyone
+else gets FREEZE: still alive, no attention this month. The rubric is a checklist a
+person fills in once per repo per month, not LLM vibes. A model can draft the
+rationale; it does not assign the score. One file per month is the artifact; the
+forced 2/3/rest counts are the discipline.
 
-- Every month, every active repo is scored against a 5-factor
-  thesis-alive rubric
-- The top 2 by composite score get ATTEND (the next month's shipping
-  attention goes here)
-- The bottom 3 get RETIRE (archived; revived only on a new written
-  rationale)
-- Everything else gets FREEZE (still alive, no attention this month)
+## Try it
 
-The rubric is not LLM vibes. It is a hand-scorable checklist a person
-fills in once per repo per month. The forcing function is that the
-counts (2, 3, all-else) are non-negotiable.
+No arguments. It reads the committed memo (`repo_triage/2026-M07.md`) and its scoring
+stubs, then prints every portfolio repo ranked by composite score with its forced
+bucket:
 
-## Status
+```bash
+python -m uv run repo-triage show
+```
 
-v0.1. Rubric, CLI, gates, and the first calibration ledger row
-(`repo_triage/2026-M07.md`) are all checked in. Live state lives in
-`STATUS.md`.
+```
+repo triage - 2026-07  (rubric v0)
+ranked by composite thesis-alive score (0-15); attention is forced:
+  2 ATTEND  /  3 RETIRE  /  rest FREEZE
 
-- [x] Repo scaffold + LICENSE + AGENTS.md
-- [x] Spec 0001 (foundation) — requirements, design, tasks, acceptance
-- [x] First-PR plan in `docs/first-pr.md`
-- [x] Rubric `rules/v0.md` checked in
-- [x] First hand-scored pass of all 20 repos (`scoring/2026-M07/`)
-- [x] First monthly memo `repo_triage/2026-M07.md`
-- [x] Four gates: `enforce_counts`, `validate_schemas`, `rubric_pinned`, `voice_lint`
-- [x] CI workflow running all gates on every PR
+  rank  score  bucket   repo
+     1  15/15  ATTEND   grid-silicon
+     2  14/15  ATTEND   dream-replay-cli
+     3  12/15  FREEZE   cdcp-control-plane
+    ...
+    20   0/15  RETIRE   quux-prototype
+
+this month's shipping attention: grid-silicon, dream-replay-cli
+```
+
+The ranked list is the point. grid-silicon at 15/15 buys the month; quux-prototype
+at 0/15 gets archived. The rubric decides, not the most recent green checkmark.
+
+## Live demo
+
+`streamlit_app.py` (repo root) is the `show` verb as an interactive page: the same
+ranked attention table, 2-3 summary metrics, a bucket filter, and per-repo rubric
+evidence. It reads the committed memo and scoring stubs directly — no network, no
+secrets.
+
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
+Deploy on Streamlit Community Cloud: new app → repo `AthenaTheOwl/repo-triage`,
+branch `main`, main file `streamlit_app.py`.
+
+<!-- live url: https://<your-app>.streamlit.app (fill in after first deploy) -->
 
 ## How to run
 
@@ -70,132 +92,38 @@ python -m uv run repo-triage rubric-pinned repo_triage/2026-M07.md --rubric rule
 python -m uv run repo-triage voice-lint repo_triage/2026-M07.md
 ```
 
-See `docs/methodology.md` for why the discipline looks this way, and
-`docs/system-map.md` for the file-level orientation.
+The four gates are the teeth: `enforce-counts` refuses a memo that doesn't hit
+2/3/rest, `validate-schemas` checks the typed shape, `rubric-pinned` confirms the
+score came from the committed rubric and not a later edit, `voice-lint` keeps the
+prose honest. CI runs all four on every PR. See `docs/methodology.md` for why the
+discipline looks this way, and `docs/system-map.md` for the file-level orientation.
 
-## try it
+## How it connects
 
-No arguments. Reads the committed memo (`repo_triage/2026-M07.md`) and
-its scoring stubs, then prints every portfolio repo ranked by composite
-score with its forced bucket:
-
-```bash
-python -m uv run repo-triage show
-```
-
-```
-repo triage - 2026-07  (rubric v0)
-ranked by composite thesis-alive score (0-15); attention is forced:
-  2 ATTEND  /  3 RETIRE  /  rest FREEZE
-
-  rank  score  bucket   repo
-     1  15/15  ATTEND   grid-silicon
-     2  14/15  ATTEND   dream-replay-cli
-     3  12/15  FREEZE   cdcp-control-plane
-    ...
-    20   0/15  RETIRE   quux-prototype
-
-this month's shipping attention: grid-silicon, dream-replay-cli
-```
-
-The ranked list is the point: it shows where next month's shipping
-attention goes and which repos the rubric forces you to archive, rather
-than letting the loudest repo win.
-
-## live demo
-
-`streamlit_app.py` (repo root) is the `show` verb as an interactive page:
-the same ranked attention table, plus 2-3 summary metrics, a bucket
-filter, and per-repo rubric evidence. it reads the committed memo and
-scoring stubs directly — no network, no secrets.
-
-run it locally:
-
-```bash
-pip install -r requirements.txt
-streamlit run streamlit_app.py
-```
-
-deploy on streamlit community cloud: new app -> repo
-`AthenaTheOwl/repo-triage`, branch `main`, main file `streamlit_app.py`.
-
-<!-- live url: https://<your-app>.streamlit.app (fill in after first deploy) -->
+[cdcp-control-plane](https://github.com/AthenaTheOwl/cdcp-control-plane) is the
+downstream consumer — it takes the typed monthly memo as an input artifact, so the
+attention decision made here flows into the control plane rather than living in
+someone's head. In this month's run cdcp-control-plane itself scores 12/15 and lands
+in FREEZE, which is the system declining to make an exception for the thing
+consuming it.
 
 ## Layout
 
 ```
 repo-triage/
-  README.md
-  LICENSE
-  AGENTS.md
-  .gitignore
-  specs/
-    0001-foundation/
-      requirements.md
-      design.md
-      tasks.md
-      acceptance.md
-  docs/
-    first-pr.md
+  src/repo_triage/        portfolio, rubric, scoring, memo, cli
+  rules/v0.md             the 5-factor rubric
+  config/portfolio.yaml   the 20 active portfolio repos
+  schemas/                scoring.schema.json, memo.schema.json
+  scoring/2026-M07/       one hand-filled stub per repo
+  repo_triage/2026-M07.md the first monthly memo
+  scripts/                thin shims over the CLI
+  streamlit_app.py        the show verb as a page
+  tests/  docs/  specs/  .github/workflows/ci.yml
 ```
-
-Shipped in v0.1:
-
-```
-  STATUS.md
-  pyproject.toml
-  src/repo_triage/                   # the Python package
-    __init__.py
-    portfolio.py
-    rubric.py
-    scoring.py
-    memo.py
-    cli.py
-    __main__.py
-  rules/
-    v0.md                            # the 5-factor rubric
-  config/
-    portfolio.yaml                   # 20 active portfolio repos
-  schemas/
-    scoring.schema.json
-    memo.schema.json
-  scoring/
-    2026-M07/<repo>.md               # one hand-filled stub per repo
-  repo_triage/
-    2026-M07.md                      # first monthly memo
-  scripts/                           # thin shims over the CLI
-    score_template.py
-    render_memo.py
-    enforce_counts.py
-    validate_schemas.py
-    rubric_pinned.py
-    voice_lint.py
-  tests/
-  docs/
-    methodology.md
-    system-map.md
-  .github/workflows/ci.yml
-```
-
-## Who this is for
-
-- The portfolio operator (the author) as the primary consumer
-- Anyone running 10+ active side-projects who needs a written-down
-  attention allocator instead of a feed-driven one
-- The CDCP control-plane work as a downstream consumer of the typed
-  memo
-
-## What this is not
-
-- Not a per-repo dashboard. There are no cards, no charts, no live
-  feeds. One file per month.
-- Not LLM-judged. The rubric is hand-scorable. An LLM may help draft
-  the rationale; it does not assign the score.
-- Not a roadmap. ATTEND tells you which repo gets the next month's
-  shipping time, not what to ship.
-- Not a graveyard catalogue. RETIRE is real archival, with a written
-  rationale, not "we might come back to it."
 
 ## License
 
 MIT. See `LICENSE`.
+</content>
+</invoke>
