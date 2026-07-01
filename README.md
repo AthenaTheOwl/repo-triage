@@ -1,5 +1,7 @@
 # repo-triage
 
+Status: archived 2026-07-01. Successor is portfolio-thesis-plane, which carries over the forced ATTEND/FREEZE/RETIRE count enforcement.
+
 Twenty active repos. Every month the rubric forces exactly two onto the ATTEND
 list, three into RETIRE, and leaves the other fifteen frozen. The counts are
 non-negotiable, which is the whole point — you can't attend to everything, so the

@@ -4,6 +4,7 @@ Last updated: 2026-06-22
 
 ## Current state
 
+- Archived 2026-07-01. The forced ATTEND/FREEZE/RETIRE count enforcement is the idea carried over into portfolio-thesis-plane, so work continues there instead of here.
 - v0.1 ships the rubric, scoring template emitter, memo renderer, four
   gate scripts, schemas, a runnable Python CLI (`repo-triage`), and the
   first calibration ledger row (`scoring/2026-M07/` + `repo_triage/2026-M07.md`
