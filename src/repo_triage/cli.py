@@ -54,7 +54,7 @@ def score_template(portfolio_path: str, rubric_path: str, month: str, out_dir: s
 @click.option("--portfolio", "portfolio_path", required=True, type=click.Path(exists=True))
 @click.option("--rubric", "rubric_path", required=True, type=click.Path(exists=True))
 @click.option("--month", required=True)
-@click.option("--prior", "prior_memo_path", type=click.Path(exists=True), default=None)
+@click.option("--prior", "prior_memo_path", type=click.Path(exists=True, dir_okay=False), default=None)
 @click.option("--out", "out_path", required=True, type=click.Path())
 def render_memo_cmd(
     scoring_dir: str,
@@ -82,7 +82,7 @@ def render_memo_cmd(
 
 
 @main.command("enforce-counts")
-@click.argument("memo_path", type=click.Path(exists=True))
+@click.argument("memo_path", type=click.Path(exists=True, dir_okay=False))
 @click.option("--portfolio", "portfolio_path", required=True, type=click.Path(exists=True))
 def enforce_counts_cmd(memo_path: str, portfolio_path: str) -> None:
     """Assert the memo has exactly 2 ATTEND, 3 RETIRE, and rest FREEZE."""
@@ -125,9 +125,9 @@ def _enforce_counts(memo: Memo, portfolio_slugs: tuple[str, ...]) -> list[str]:
 
 
 @main.command("validate-schemas")
-@click.argument("memo_path", type=click.Path(exists=True))
-@click.option("--memo-schema", "memo_schema", required=True, type=click.Path(exists=True))
-@click.option("--scoring-schema", "scoring_schema", type=click.Path(exists=True))
+@click.argument("memo_path", type=click.Path(exists=True, dir_okay=False))
+@click.option("--memo-schema", "memo_schema", required=True, type=click.Path(exists=True, dir_okay=False))
+@click.option("--scoring-schema", "scoring_schema", type=click.Path(exists=True, dir_okay=False))
 @click.option("--scoring-dir", "scoring_dir", type=click.Path(exists=True))
 def validate_schemas_cmd(
     memo_path: str,
@@ -277,7 +277,7 @@ def show_cmd() -> None:
 
 
 @main.command("rubric-pinned")
-@click.argument("memo_path", type=click.Path(exists=True))
+@click.argument("memo_path", type=click.Path(exists=True, dir_okay=False))
 @click.option("--rubric", "rubric_path", required=True, type=click.Path(exists=True))
 def rubric_pinned_cmd(memo_path: str, rubric_path: str) -> None:
     """Assert the memo pins a rubric version that matches ``rubric_path``."""
@@ -313,7 +313,7 @@ _BANNED_PHRASES: tuple[str, ...] = (
 
 
 @main.command("voice-lint")
-@click.argument("memo_path", type=click.Path(exists=True))
+@click.argument("memo_path", type=click.Path(exists=True, dir_okay=False))
 def voice_lint_cmd(memo_path: str) -> None:
     """Reject the memo if it contains banned marketing or antithetical-reversal phrases."""
     text = Path(memo_path).read_text(encoding="utf-8")
