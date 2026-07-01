@@ -125,5 +125,3 @@ repo-triage/
 ## License
 
 MIT. See `LICENSE`.
-</content>
-</invoke>
