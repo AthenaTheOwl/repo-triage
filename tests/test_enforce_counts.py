@@ -43,6 +43,21 @@ def test_enforce_counts_helper_rejects_overlap() -> None:
     assert any("both" in e for e in errors)
 
 
+def test_enforce_counts_helper_rejects_retire_freeze_overlap() -> None:
+    # Pins the ('RETIRE', 'FREEZE') pair specifically: a slug in both retire
+    # and freeze must be flagged, not only the ATTEND/FREEZE case above.
+    memo = Memo(
+        month="2026-07",
+        rubric_version="v0",
+        attend=("a", "b"),
+        retire=("c", "d", "e"),
+        freeze=("c",),  # overlap with RETIRE
+        deltas=(),
+    )
+    errors = _enforce_counts(memo, ("a", "b", "c", "d", "e"))
+    assert any("both RETIRE and FREEZE" in e for e in errors), errors
+
+
 def test_enforce_counts_cli_passes(
     m07_memo_path: Path,
     portfolio_path: Path,

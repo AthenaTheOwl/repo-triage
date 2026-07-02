@@ -3,7 +3,14 @@ from pathlib import Path
 import pytest
 import yaml
 
-from repo_triage.memo import ATTEND_COUNT, RETIRE_COUNT, load_memo, render_memo
+from repo_triage.memo import (
+    ATTEND_COUNT,
+    RETIRE_COUNT,
+    Memo,
+    _compute_deltas,
+    load_memo,
+    render_memo,
+)
 from repo_triage.portfolio import load_portfolio
 from repo_triage.rubric import load_rubric
 
@@ -139,6 +146,39 @@ def test_render_memo_rejects_rubric_version_mismatch(
             month="2026-07",
             rubric_version="v1",
         )
+
+
+def test_compute_deltas_prior_vs_current() -> None:
+    # Golden-master lock on the prior-vs-current bucketing diff. Without a
+    # non-None prior the whole path in _compute_deltas is unpinned, so this
+    # pins the exact promoted/moved/dropped wording against a known prior.
+    prior = Memo(
+        month="2026-06",
+        rubric_version="v0",
+        attend=("alpha", "bravo"),
+        retire=("charlie", "delta", "echo"),
+        freeze=("foxtrot",),
+        deltas=(),
+    )
+    # charlie: RETIRE -> ATTEND (promotion); foxtrot: FREEZE -> RETIRE;
+    # alpha: ATTEND -> FREEZE (dropped); echo: RETIRE -> ATTEND (promotion).
+    deltas = _compute_deltas(
+        prior,
+        attend=["charlie", "echo"],
+        retire=("delta", "foxtrot", "bravo"),
+        freeze=["alpha"],
+    )
+    assert deltas == [
+        "promoted to ATTEND: charlie (was RETIRE)",
+        "promoted to ATTEND: echo (was RETIRE)",
+        "moved to RETIRE: foxtrot (was FREEZE)",
+        "moved to RETIRE: bravo (was ATTEND)",
+        "dropped from ATTEND to FREEZE: alpha",
+    ]
+
+
+def test_compute_deltas_no_prior_is_empty() -> None:
+    assert _compute_deltas(None, ["a"], ["b"], ["c"]) == []
 
 
 def test_checked_in_m07_memo_parses(m07_memo_path: Path) -> None:
