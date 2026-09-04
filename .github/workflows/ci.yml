@@ -48,3 +48,5 @@ jobs:
         run: |
           python -m uv run repo-triage voice-lint \
             repo_triage/2026-M07.md
+      - name: validate_data_conformance
+        run: python scripts/validate_data_conformance.py
