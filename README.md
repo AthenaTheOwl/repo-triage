@@ -102,8 +102,8 @@ discipline looks this way, and `docs/system-map.md` for the file-level orientati
 
 ## How it connects
 
-[cdcp-control-plane](https://github.com/AthenaTheOwl/cdcp-control-plane) is the
-downstream consumer — it takes the typed monthly memo as an input artifact, so the
+`cdcp-control-plane` (a portfolio entry in `config/portfolio.yaml`, not yet a
+public repo) is the downstream consumer — it takes the typed monthly memo as an input artifact, so the
 attention decision made here flows into the control plane rather than living in
 someone's head. In this month's run cdcp-control-plane itself scores 12/15 and lands
 in FREEZE, which is the system declining to make an exception for the thing
