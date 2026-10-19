@@ -27,6 +27,5 @@ classification. Because the successor uses a different rubric and cadence, treat
 the switch as an explicit new decision and preserve the old scores without
 converting them into apparently comparable numbers.
 
-This is a manual migration recipe, not a newly shipped converter. It applies the
-preserve-history principle in [AI Product Team's change workflow](https://github.com/3orionkings/ai-product-team/blob/main/workflows/process-change.md)
-while leaving this archived project's monthly records intact.
+This is a manual migration recipe, not a newly shipped converter, and it leaves
+this archived project's monthly records intact.
