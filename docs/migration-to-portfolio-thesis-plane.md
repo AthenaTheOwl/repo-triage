@@ -18,8 +18,10 @@ read from hand-curated signal files; nobody enters the rubric v0 scores there.
 Keep the archived hand scores as recorded. An assistant may retrieve evidence,
 summarize changes and draft rationale. It should not silently replace the
 person's five-factor scores with inferred scores from commit counts, stars, or
-its own enthusiasm for a new feature. Unknown evidence stays unknown until
-someone supplies or reviews it.
+its own enthusiasm for a new feature. If an archived score was never filled in,
+leave it blank; do not backfill it. In portfolio-thesis-plane, a repo with no
+curated signals scores 0 and can be forced into RETIRE, so give each migrated
+repo signals before reading its first weekly result as a decision.
 
 For the first migrated week, compare the successor's allocation with the last
 archived month for the repos both registries list. Explain any change in
