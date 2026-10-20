@@ -4,7 +4,8 @@ Status: archived 2026-07-01. Successor is portfolio-thesis-plane, which carries 
 
 The [migration recipe](docs/migration-to-portfolio-thesis-plane.md) preserves
 historical membership, rubric pins, human scores and allocation counts while
-moving new attention decisions to the maintained, weekly successor.
+moving new attention decisions to the successor, which is designed for weekly
+runs.
 
 Twenty active repos. Every month the rubric forces exactly two onto the ATTEND
 list, three into RETIRE, and leaves the other fifteen frozen. The counts are

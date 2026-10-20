@@ -24,8 +24,12 @@ curated signals scores 0 and can be forced into RETIRE, so give each migrated
 repo signals before reading its first weekly result as a decision.
 
 For the first migrated week, compare the successor's allocation with the last
-archived month for the repos both registries list. Explain any change in
-classification. Because the successor uses a different rubric and cadence, treat
+archived month for the repos both registries list. Only dream-replay-cli
+appears in both today, so the comparison covers that one repo; the other
+nineteen archived repos keep their last monthly verdict as a dated record. The
+successor's committed weeks (2026-W25 and 2026-W26) predate this archive, so
+that first week still has to be curated and generated there. Explain any change
+in classification. Because the successor uses a different rubric and cadence, treat
 the switch as an explicit new decision and preserve the old scores without
 converting them into apparently comparable numbers.
 
